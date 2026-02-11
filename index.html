@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Scroll Frames Test</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        height: 500vh; /* espaço pro scroll */
+        background: black;
+      }
+
+      canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .info {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        color: white;
+        font-family: monospace;
+        z-index: 10;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <div class="info">Scroll ↓</div>
+
+    <script>
+      const frameCount = 886; // 👈 quantidade de imagens
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const images = [];
+      let imagesLoaded = 0;
+
+      // caminho das imagens
+      const currentFrame = (i) =>
+        `frames/frame_${String(i).padStart(4, "0")}.jpg`; // troque pra .webp se precisar
+
+      // preload
+      for (let i = 1; i <= frameCount; i++) {
+        const img = new Image();
+        img.src = currentFrame(i);
+
+        img.onload = () => {
+          imagesLoaded++;
+          if (imagesLoaded === 1) draw(0);
+        };
+
+        images.push(img);
+      }
+
+      function draw(index) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(images[index], 0, 0, canvas.width, canvas.height);
+      }
+
+      function onScroll() {
+        const scrollTop = window.scrollY;
+        const maxScroll = document.body.scrollHeight - window.innerHeight;
+
+        const progress = scrollTop / maxScroll;
+
+        const frameIndex = Math.min(
+          frameCount - 1,
+          Math.floor(progress * frameCount)
+        );
+
+        requestAnimationFrame(() => draw(frameIndex));
+      }
+
+      window.addEventListener("scroll", onScroll);
+
+      // resize
+      window.addEventListener("resize", () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+    </script>
+  </body>
+</html>
